@@ -1,0 +1,39 @@
+---
+- name: Wait for cloud-init to finish first boot
+  ansible.builtin.command: cloud-init status --wait
+  changed_when: false
+  failed_when: false
+
+- name: Install base packages
+  ansible.builtin.apt:
+    name: [git, curl, jq, htop, ca-certificates, unattended-upgrades]
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Set timezone (builtin)
+  ansible.builtin.command: timedatectl set-timezone {{ timezone }}
+  changed_when: false
+
+- name: Create swap file (helps Docker builds on a 2 GiB instance)
+  ansible.builtin.command: >
+    bash -c "fallocate -l {{ swap_size_mb }}M /swapfile && chmod 600 /swapfile &&
+    mkswap /swapfile && swapon /swapfile"
+  args:
+    creates: /swapfile
+
+- name: Persist swap across reboots
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    line: "/swapfile none swap sw 0 0"
+
+- name: Lower swappiness (persisted)
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/60-obsidian.conf
+    content: "vm.swappiness=10\n"
+    mode: "0644"
+  register: sysctl_conf
+
+- name: Apply sysctl
+  ansible.builtin.command: sysctl --system
+  when: sysctl_conf.changed

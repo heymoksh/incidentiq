@@ -1,0 +1,11 @@
+---
+- name: Connectivity check
+  hosts: web
+  gather_facts: true
+  tasks:
+    - name: Ping the storefront server
+      ansible.builtin.ping:
+
+    - name: Show what Terraform gave us
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} -> {{ ansible_host }} | {{ ansible_distribution }} {{ ansible_distribution_version }} | {{ ansible_processor_vcpus }} vCPU | {{ ansible_memtotal_mb }} MB RAM"

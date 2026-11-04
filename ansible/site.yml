@@ -1,0 +1,14 @@
+---
+- name: Configure the incidentIQ CI/CD server (Docker + Jenkins)
+  hosts: web
+  become: true
+  roles:
+    - common
+    - docker
+    - jenkins
+  post_tasks:
+    - name: Summary
+      ansible.builtin.debug:
+        msg:
+          - "Jenkins : http://{{ ansible_host }}:8080/  (user admin, password in ansible/keys/jenkins-admin-password.txt)"
+          - "incidentIQ will be live at http://{{ ansible_host }}/ after the first Jenkins build"

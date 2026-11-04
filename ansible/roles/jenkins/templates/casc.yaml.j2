@@ -1,0 +1,37 @@
+jenkins:
+  systemMessage: "incidentIQ CI/CD | Moksh Jain (RA2311003010474) & Sanvi Soneji (RA2311003010444)"
+  numExecutors: 2
+  mode: NORMAL
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: admin
+          name: incidentIQ Admin
+          password: "${JENKINS_ADMIN_PASSWORD}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: true
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: true
+unclassified:
+  location:
+    url: "http://{{ ansible_host }}:8080/"
+jobs:
+  - script: |
+      pipelineJob('incidentiq-pipeline') {
+        description('incidentIQ: GitHub -> Jenkins -> Docker build and test -> deploy on AWS EC2')
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote { url('{{ repo_url }}') }
+                branch('*/main')
+              }
+            }
+            scriptPath('Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }

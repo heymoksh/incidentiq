@@ -1,0 +1,58 @@
+---
+- name: Jenkins build context
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /opt/jenkins-image/
+    mode: "0644"
+  loop: [Dockerfile, plugins.txt]
+
+- name: Build Jenkins image (Docker CLI + kubectl + plugins)
+  ansible.builtin.command: docker build -t incidentiq-jenkins:latest /opt/jenkins-image
+  changed_when: true
+
+- name: Jenkins home on the host (same path inside the container so docker volume paths match)
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "1000"
+    group: "1000"
+    mode: "0755"
+  loop:
+    - /var/jenkins_home
+    - /var/jenkins_home/.kube
+    - /var/jenkins_home/trivy-cache
+
+- name: Jenkins configuration as code
+  ansible.builtin.template:
+    src: casc.yaml.j2
+    dest: /var/jenkins_home/casc.yaml
+    owner: "1000"
+    group: "1000"
+    mode: "0600"
+
+- name: Docker group id (lets Jenkins use the host Docker engine)
+  ansible.builtin.command: getent group docker
+  register: docker_group
+  changed_when: false
+
+- name: Run Jenkins
+  ansible.builtin.shell: |
+    docker rm -f jenkins >/dev/null 2>&1 || true
+    docker run -d --name jenkins --restart unless-stopped \
+      -p 8080:8080 \
+      --group-add {{ docker_group.stdout.split(':')[2] }} \
+      --add-host host.docker.internal:host-gateway \
+      -e JENKINS_ADMIN_PASSWORD='{{ jenkins_admin_password }}' \
+      -v /var/jenkins_home:/var/jenkins_home \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      incidentiq-jenkins:latest
+  changed_when: true
+
+- name: Wait for Jenkins to come up
+  ansible.builtin.uri:
+    url: http://127.0.0.1:8080/login
+    status_code: 200
+  register: jenkins_up
+  retries: 40
+  delay: 5
+  until: jenkins_up.status == 200

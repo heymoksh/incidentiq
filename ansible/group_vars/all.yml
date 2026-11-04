@@ -1,0 +1,5 @@
+---
+timezone: Asia/Kolkata
+swap_size_mb: 2048
+repo_url: https://github.com/heymoksh/incidentiq.git
+jenkins_admin_password: "{{ lookup('password', playbook_dir + '/keys/jenkins-admin-password.txt chars=ascii_letters,digits length=20') }}"

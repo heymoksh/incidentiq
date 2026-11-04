@@ -1,0 +1,14 @@
+{
+  "name": "incidentiq",
+  "version": "1.0.0",
+  "description": "incidentIQ - Cloud-Native Incident Management System",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/app.test.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

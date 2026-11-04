@@ -1,0 +1,12 @@
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+tfplan
+ansible/keys/*
+!ansible/keys/.gitkeep
+ansible/inventory/hosts.ini
+*.pem
+node_modules/
+screenshots/
+logs/
+*.docx

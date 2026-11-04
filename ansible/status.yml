@@ -1,0 +1,17 @@
+---
+- name: incidentIQ server status
+  hosts: web
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Containers, images and data volume
+      ansible.builtin.shell: |
+        echo "== docker ps"; docker ps --format "table {{ '{{' }}.Names{{ '}}' }}\t{{ '{{' }}.Image{{ '}}' }}\t{{ '{{' }}.Status{{ '}}' }}\t{{ '{{' }}.Ports{{ '}}' }}"
+        echo; echo "== docker images incidentiq"; docker images incidentiq --format "table {{ '{{' }}.Repository{{ '}}' }}\t{{ '{{' }}.Tag{{ '}}' }}\t{{ '{{' }}.Size{{ '}}' }}"
+        echo; echo "== persistent data volume"; docker volume inspect incidentiq-data --format "{{ '{{' }}.Name{{ '}}' }} -> {{ '{{' }}.Mountpoint{{ '}}' }}"
+        echo; echo "== health"; curl -s http://127.0.0.1/health
+      register: out
+      changed_when: false
+    - name: Show
+      ansible.builtin.debug:
+        msg: "{{ out.stdout_lines }}"

@@ -1,0 +1,29 @@
+---
+- name: Install Docker engine, Buildx and Compose v2 (Ubuntu packages)
+  ansible.builtin.apt:
+    name: [docker.io, docker-buildx, docker-compose-v2]
+    state: present
+    update_cache: true
+
+- name: Docker daemon log rotation
+  ansible.builtin.copy:
+    dest: /etc/docker/daemon.json
+    content: |
+      {
+        "log-driver": "json-file",
+        "log-opts": { "max-size": "10m", "max-file": "3" }
+      }
+    mode: "0644"
+  notify: Restart docker
+
+- name: Docker service enabled and running
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started
+
+- name: Allow ubuntu user to run docker
+  ansible.builtin.user:
+    name: ubuntu
+    groups: docker
+    append: true

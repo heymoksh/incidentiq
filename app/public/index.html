@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>incidentIQ - Incident Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">incident<b>IQ</b> <span>Cloud-Native Incident Management System</span></div>
+    <div class="team">Moksh Jain (RA2311003010474) &nbsp;|&nbsp; Sanvi Soneji (RA2311003010444)</div>
+  </header>
+
+  <main>
+    <section class="stats">
+      <div class="card"><small>Open incidents</small><b id="sOpen">0</b></div>
+      <div class="card p1"><small>Open P1 (critical)</small><b id="sP1">0</b></div>
+      <div class="card"><small>Resolved</small><b id="sResolved">0</b></div>
+      <div class="card"><small>Mean time to resolve</small><b id="sMttr">0 min</b></div>
+    </section>
+
+    <div class="grid">
+      <section class="panel">
+        <h2>Report an Incident</h2>
+        <form id="form">
+          <label>Title<input id="title" placeholder="e.g. Payments API is down" required></label>
+          <label>Description<textarea id="description" rows="3" placeholder="What is happening? Who is affected?"></textarea></label>
+          <label>Affected service<select id="service" required></select></label>
+          <label>Severity
+            <select id="severity">
+              <option value="">Let IQ suggest</option>
+              <option>P1</option><option>P2</option><option>P3</option><option>P4</option>
+            </select>
+          </label>
+          <p class="hint" id="suggest">IQ suggestion: -</p>
+          <label>Reported by<input id="reporter" placeholder="Your name" required></label>
+          <button type="submit">Create Incident</button>
+          <p id="msg"></p>
+        </form>
+      </section>
+
+      <section class="panel wide">
+        <div class="list-head">
+          <h2>Incidents</h2>
+          <select id="filter">
+            <option value="">All statuses</option>
+            <option>Open</option><option>Investigating</option><option>Resolved</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr><th>ID</th><th>Title</th><th>Service</th><th>Severity</th><th>Status</th><th>Reported</th></tr></thead>
+          <tbody id="rows"><tr><td colspan="6" class="empty">No incidents yet</td></tr></tbody>
+        </table>
+
+        <div id="detail" class="detail hidden">
+          <h3 id="dTitle"></h3>
+          <p id="dMeta" class="meta"></p>
+          <p id="dDesc"></p>
+          <div class="actions">
+            <button data-status="Investigating" class="btn-amber">Mark Investigating</button>
+            <button data-status="Resolved" class="btn-green">Mark Resolved</button>
+            <button data-status="Open" class="btn-grey">Re-open</button>
+          </div>
+          <form id="noteForm" class="note">
+            <input id="note" placeholder="Add an update to the timeline">
+            <button type="submit">Add update</button>
+          </form>
+          <h4>Timeline</h4>
+          <ul id="timeline"></ul>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer id="footer">incidentIQ</footer>
+  <script src="app.js"></script>
+</body>
+</html>
